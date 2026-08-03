@@ -4,7 +4,7 @@ const User = require('../models/User');
 const { ErrorResponse } = require('./errorMiddleware');
 
 /**
- * Verify JWT token and attach user to request
+ * Verify JWT token and attach user to requesut
  */
 const protect = asyncHandler(async (req, res, next) => {
   let token;

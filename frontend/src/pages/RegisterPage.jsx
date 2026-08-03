@@ -1,266 +1,526 @@
+// import { useState } from 'react';
+// import { Link, useNavigate } from 'react-router-dom';
+// import { authAPI } from '../services/apiService';
+// import { 
+//   User, 
+//   Mail, 
+//   Lock, 
+//   Phone, 
+//   Upload,
+//   FileText,
+//   AlertCircle,
+//   CheckCircle2,
+//   Loader2,
+//   X
+// } from 'lucide-react';
+
+// const RegisterPage = () => {
+//   const navigate = useNavigate();
+  
+//   const [formData, setFormData] = useState({
+//     name: '',
+//     email: '',
+//     password: '',
+//     confirmPassword: '',
+//     role: 'student',
+//     branch: '',
+//     year: '',
+//     rollNumber: '',
+//     phone: '',
+//     cgpa: '',
+//     tenthPercentage: '',
+//     twelfthPercentage: ''
+//   });
+  
+//   const [resumeFile, setResumeFile] = useState(null);
+//   const [loading, setLoading] = useState(false);
+//   const [error, setError] = useState('');
+//   const [success, setSuccess] = useState('');
+
+//   const handleChange = (e) => {
+//     setFormData({ ...formData, [e.target.name]: e.target.value });
+//   };
+
+//   const handleResumeChange = (e) => {
+//     const file = e.target.files[0];
+//     if (file) {
+//       if (file.type !== 'application/pdf') {
+//         setError('Only PDF files are allowed');
+//         return;
+//       }
+//       if (file.size > 5 * 1024 * 1024) {
+//         setError('File size must be less than 5MB');
+//         return;
+//       }
+//       setResumeFile(file);
+//       setError('');
+//     }
+//   };
+
+//   const removeResume = () => {
+//     setResumeFile(null);
+//   };
+
+//   const handleSubmit = async (e) => {
+//     e.preventDefault();
+//     setError('');
+//     setSuccess('');
+
+//     if (formData.password !== formData.confirmPassword) {
+//       setError('Passwords do not match');
+//       return;
+//     }
+
+//     if (formData.password.length < 6) {
+//       setError('Password must be at least 6 characters');
+//       return;
+//     }
+
+//     setLoading(true);
+
+//     try {
+//       const data = new FormData();
+//       data.append('name', formData.name);
+//       data.append('email', formData.email);
+//       data.append('password', formData.password);
+//       data.append('role', formData.role);
+      
+//       if (formData.role === 'student') {
+//         data.append('branch', formData.branch);
+//         data.append('year', formData.year);
+//         data.append('rollNumber', formData.rollNumber);
+//         data.append('phone', formData.phone);
+//         data.append('cgpa', formData.cgpa);
+//         data.append('tenthPercentage', formData.tenthPercentage);
+//         data.append('twelfthPercentage', formData.twelfthPercentage);
+//       }
+
+//       if (resumeFile) {
+//         data.append('resume', resumeFile);
+//       }
+
+//       await authAPI.register(data);
+      
+//       // ✅ Auto login removed — show success and redirect to login
+//       setSuccess('Registration successful! Please wait for TPO verification before logging in.');
+      
+//       // Form clear karo
+//       setFormData({
+//         name: '',
+//         email: '',
+//         password: '',
+//         confirmPassword: '',
+//         role: 'student',
+//         branch: '',
+//         year: '',
+//         rollNumber: '',
+//         phone: '',
+//         cgpa: '',
+//         tenthPercentage: '',
+//         twelfthPercentage: ''
+//       });
+//       setResumeFile(null);
+      
+//       // 3 second baad login page pe redirect karo with message
+//       setTimeout(() => {
+//         navigate('/login?message=Account created! Please wait for TPO verification.');
+//       }, 3000);
+      
+//     } catch (err) {
+//       setError(err.response?.data?.message || 'Registration failed');
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   const branches = ['CSE', 'IT', 'ECE', 'EEE', 'MECH', 'CIVIL', 'OTHER'];
+
+//   return (
+//     <div className="min-h-screen bg-gray-50 py-8">
+//       <div className="max-w-lg mx-auto px-4 sm:px-6 lg:px-8">
+//         <div className="text-center mb-8">
+//           <h1 className="text-3xl font-bold text-gray-900">Create Account</h1>
+//           <p className="text-gray-600 mt-2">Join Smart Placement Portal</p>
+//         </div>
+
+//         {error && (
+//           <div className="mb-6 flex items-start gap-3 bg-red-50 border border-red-200 rounded-lg p-4">
+//             <AlertCircle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
+//             <p className="text-sm text-red-700">{error}</p>
+//           </div>
+//         )}
+
+//         {success && (
+//           <div className="mb-6 flex items-start gap-3 bg-green-50 border border-green-200 rounded-lg p-4">
+//             <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+//             <p className="text-sm text-green-700">{success}</p>
+//           </div>
+//         )}
+
+//         <form onSubmit={handleSubmit} className="card space-y-5">
+//           {/* Role Selection */}
+//           <div>
+//             <label className="block text-sm font-medium text-gray-700 mb-2">Register As</label>
+//             <div className="grid grid-cols-3 gap-3">
+//               {['student', 'company', 'tpo'].map((r) => (
+//                 <button
+//                   key={r}
+//                   type="button"
+//                   onClick={() => setFormData({ ...formData, role: r })}
+//                   className={`py-2 px-4 rounded-lg border-2 text-sm font-medium capitalize transition-all ${
+//                     formData.role === r
+//                       ? 'border-primary-500 bg-primary-50 text-primary-700'
+//                       : 'border-gray-200 text-gray-600 hover:border-gray-300'
+//                   }`}
+//                 >
+//                   {r}
+//                 </button>
+//               ))}
+//             </div>
+//           </div>
+
+//           {/* Name */}
+//           <div>
+//             <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+//             <div className="relative">
+//               <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+//               <input
+//                 type="text"
+//                 name="name"
+//                 required
+//                 value={formData.name}
+//                 onChange={handleChange}
+//                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+//                 placeholder="Your full name"
+//               />
+//             </div>
+//           </div>
+
+//           {/* Email */}
+//           <div>
+//             <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+//             <div className="relative">
+//               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+//               <input
+//                 type="email"
+//                 name="email"
+//                 required
+//                 value={formData.email}
+//                 onChange={handleChange}
+//                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+//                 placeholder="your@email.com"
+//               />
+//             </div>
+//           </div>
+
+//           {/* Password */}
+//           <div className="grid grid-cols-2 gap-4">
+//             <div>
+//               <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+//               <div className="relative">
+//                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+//                 <input
+//                   type="password"
+//                   name="password"
+//                   required
+//                   value={formData.password}
+//                   onChange={handleChange}
+//                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+//                   placeholder="••••••"
+//                 />
+//               </div>
+//             </div>
+//             <div>
+//               <label className="block text-sm font-medium text-gray-700 mb-1">Confirm</label>
+//               <input
+//                 type="password"
+//                 name="confirmPassword"
+//                 required
+//                 value={formData.confirmPassword}
+//                 onChange={handleChange}
+//                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+//                 placeholder="••••••"
+//               />
+//             </div>
+//           </div>
+
+//           {/* Student Only Fields */}
+//           {formData.role === 'student' && (
+//             <>
+//               <div className="grid grid-cols-2 gap-4">
+//                 <div>
+//                   <label className="block text-sm font-medium text-gray-700 mb-1">Branch</label>
+//                   <select
+//                     name="branch"
+//                     value={formData.branch}
+//                     onChange={handleChange}
+//                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+//                   >
+//                     <option value="">Select</option>
+//                     {branches.map(b => (
+//                       <option key={b} value={b}>{b}</option>
+//                     ))}
+//                   </select>
+//                 </div>
+//                 <div>
+//                   <label className="block text-sm font-medium text-gray-700 mb-1">Year</label>
+//                   <select
+//                     name="year"
+//                     value={formData.year}
+//                     onChange={handleChange}
+//                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+//                   >
+//                     <option value="">Select</option>
+//                     <option value="1">1st Year</option>
+//                     <option value="2">2nd Year</option>
+//                     <option value="3">3rd Year</option>
+//                     <option value="4">4th Year</option>
+//                   </select>
+//                 </div>
+//               </div>
+
+//               <div className="grid grid-cols-2 gap-4">
+//                 <div>
+//                   <label className="block text-sm font-medium text-gray-700 mb-1">Roll Number</label>
+//                   <input
+//                     type="text"
+//                     name="rollNumber"
+//                     value={formData.rollNumber}
+//                     onChange={handleChange}
+//                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+//                     placeholder="e.g., 2021CSE001"
+//                   />
+//                 </div>
+//                 <div>
+//                   <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+//                   <div className="relative">
+//                     <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+//                     <input
+//                       type="tel"
+//                       name="phone"
+//                       value={formData.phone}
+//                       onChange={handleChange}
+//                       className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+//                       placeholder="+91 98765 43210"
+//                     />
+//                   </div>
+//                 </div>
+//               </div>
+
+//               {/* CGPA */}
+//               <div>
+//                 <label className="block text-sm font-medium text-gray-700 mb-1">Current CGPA</label>
+//                 <input
+//                   type="number"
+//                   step="0.01"
+//                   min="0"
+//                   max="10"
+//                   name="cgpa"
+//                   value={formData.cgpa}
+//                   onChange={handleChange}
+//                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+//                   placeholder="e.g., 8.5"
+//                 />
+//               </div>
+
+//               {/* 10th & 12th Percentage */}
+//               <div className="grid grid-cols-2 gap-4">
+//                 <div>
+//                   <label className="block text-sm font-medium text-gray-700 mb-1">10th Percentage</label>
+//                   <input
+//                     type="number"
+//                     step="0.1"
+//                     min="0"
+//                     max="100"
+//                     name="tenthPercentage"
+//                     value={formData.tenthPercentage}
+//                     onChange={handleChange}
+//                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+//                     placeholder="e.g., 85.5"
+//                     required
+//                   />
+//                 </div>
+//                 <div>
+//                   <label className="block text-sm font-medium text-gray-700 mb-1">12th Percentage</label>
+//                   <input
+//                     type="number"
+//                     step="0.1"
+//                     min="0"
+//                     max="100"
+//                     name="twelfthPercentage"
+//                     value={formData.twelfthPercentage}
+//                     onChange={handleChange}
+//                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+//                     placeholder="e.g., 87.0"
+//                     required
+//                   />
+//                 </div>
+//               </div>
+
+//               {/* Resume Upload */}
+//               <div>
+//                 <label className="block text-sm font-medium text-gray-700 mb-2">
+//                   Upload Resume <span className="text-gray-400 font-normal">(Optional)</span>
+//                 </label>
+                
+//                 {!resumeFile ? (
+//                   <div className="relative">
+//                     <input
+//                       type="file"
+//                       accept=".pdf,application/pdf"
+//                       onChange={handleResumeChange}
+//                       className="hidden"
+//                       id="resume-upload"
+//                     />
+//                     <label
+//                       htmlFor="resume-upload"
+//                       className="flex items-center justify-center gap-2 w-full px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary-400 hover:bg-primary-50 cursor-pointer transition-colors"
+//                     >
+//                       <Upload className="h-5 w-5 text-gray-400" />
+//                       <span className="text-sm text-gray-600">Click to upload PDF resume</span>
+//                     </label>
+//                     <p className="text-xs text-gray-400 mt-1">PDF only, max 5MB</p>
+//                   </div>
+//                 ) : (
+//                   <div className="flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-lg">
+//                     <div className="flex items-center gap-3">
+//                       <FileText className="h-5 w-5 text-blue-600" />
+//                       <div>
+//                         <p className="text-sm font-medium text-gray-900">{resumeFile.name}</p>
+//                         <p className="text-xs text-gray-500">{(resumeFile.size / 1024).toFixed(1)} KB</p>
+//                       </div>
+//                     </div>
+//                     <button
+//                       type="button"
+//                       onClick={removeResume}
+//                       className="h-8 w-8 bg-white hover:bg-red-50 rounded-lg flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors"
+//                     >
+//                       <X className="h-4 w-4" />
+//                     </button>
+//                   </div>
+//                 )}
+//               </div>
+//             </>
+//           )}
+
+//           <button
+//             type="submit"
+//             disabled={loading}
+//             className="w-full btn-primary py-3 flex items-center justify-center gap-2"
+//           >
+//             {loading ? (
+//               <>
+//                 <Loader2 className="h-4 w-4 animate-spin" />
+//                 Creating Account...
+//               </>
+//             ) : (
+//               'Create Account'
+//             )}
+//           </button>
+
+//           <p className="text-center text-sm text-gray-600">
+//             Already have an account?{' '}
+//             <Link to="/login" className="text-primary-600 hover:text-primary-700 font-medium">
+//               Login
+//             </Link>
+//           </p>
+//         </form>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default RegisterPage;
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import InputField from '../components/common/InputField';
-import Button from '../components/common/Button';
+import { authAPI } from '../services/apiService';
 import { 
+  User, 
   Mail, 
   Lock, 
-  User, 
-  GraduationCap, 
-  Building2, 
-  ArrowRight, 
+  Phone,
   AlertCircle,
   CheckCircle2,
-  Briefcase
+  Loader2
 } from 'lucide-react';
 
 const RegisterPage = () => {
-  const { register } = useAuth();
   const navigate = useNavigate();
   
-  const [step, setStep] = useState(1); // 1 = Account, 2 = Profile
-  const [role, setRole] = useState('');
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-
-  // Step 1: Account Data
-  const [accountData, setAccountData] = useState({
+  const [formData, setFormData] = useState({
+    name: '',
     email: '',
     password: '',
     confirmPassword: '',
+    role: 'student',
+    phone: ''
   });
+  
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
-  // Step 2: Profile Data
-  const [profileData, setProfileData] = useState({
-    // Student fields
-    personalInfo: {
-      name: '',
-      branch: '',
-      year: '',
-      rollNumber: '',
-    },
-    academics: {
-      cgpa: '',
-      tenthPercent: '',
-      twelfthPercent: '',
-      backlogs: '0',
-    },
-    skills: [],
-    preferences: {
-      domains: [],
-      expectedPackage: '',
-    },
-    // Company fields
-    name: '',
-    description: '',
-    website: '',
-    // Alumni fields
-    company: '',
-    role: '',
-    batch: '',
-    branch: '',
-    willingToRefer: false,
-    mentorshipAvailable: false,
-  });
-
-  const handleAccountChange = (e) => {
-    setAccountData({
-      ...accountData,
-      [e.target.name]: e.target.value,
-    });
-    setError('');
-  };
-
-  const handleProfileChange = (e) => {
-    const { name, value } = e.target;
-    
-    // Nested object handling
-    if (name.includes('.')) {
-      const [parent, child] = name.split('.');
-      setProfileData({
-        ...profileData,
-        [parent]: {
-          ...profileData[parent],
-          [child]: value,
-        },
-      });
-    } else {
-      setProfileData({
-        ...profileData,
-        [name]: value,
-      });
-    }
-    setError('');
-  };
-
-  const handleSkillsChange = (e) => {
-    const skills = e.target.value.split(',').map(s => s.trim()).filter(s => s);
-    setProfileData({
-      ...profileData,
-      skills,
-    });
-  };
-
-  const validateStep1 = () => {
-    if (!accountData.email || !accountData.password) {
-      setError('Please fill all required fields');
-      return false;
-    }
-    if (accountData.password !== accountData.confirmPassword) {
-      setError('Passwords do not match');
-      return false;
-    }
-    if (accountData.password.length < 6) {
-      setError('Password must be at least 6 characters');
-      return false;
-    }
-    if (!role) {
-      setError('Please select a role');
-      return false;
-    }
-    return true;
-  };
-
-  const handleNextStep = () => {
-    if (validateStep1()) {
-      setStep(2);
-    }
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
     setError('');
+    setSuccess('');
 
-    // Prepare profile data based on role
-    let finalProfileData = {};
-    
-    if (role === 'student') {
-      finalProfileData = {
-        personalInfo: profileData.personalInfo,
-        academics: {
-          ...profileData.academics,
-          cgpa: parseFloat(profileData.academics.cgpa),
-          tenthPercent: parseFloat(profileData.academics.tenthPercent),
-          twelfthPercent: parseFloat(profileData.academics.twelfthPercent),
-          backlogs: parseInt(profileData.academics.backlogs),
-        },
-        skills: profileData.skills,
-        preferences: {
-          domains: profileData.preferences.domains,
-          expectedPackage: profileData.preferences.expectedPackage ? parseInt(profileData.preferences.expectedPackage) : null,
-        },
-      };
-    } else if (role === 'company') {
-      finalProfileData = {
-        name: profileData.name,
-        description: profileData.description,
-        website: profileData.website,
-      };
-    } else if (role === 'alumni') {
-      finalProfileData = {
-        company: profileData.company,
-        role: profileData.role,
-        batch: parseInt(profileData.batch),
-        branch: profileData.branch,
-        willingToRefer: profileData.willingToRefer,
-        mentorshipAvailable: profileData.mentorshipAvailable,
-      };
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      return;
     }
 
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters');
+      return;
+    }
+
+    setLoading(true);
+
     try {
-      await register({
-        email: accountData.email,
-        password: accountData.password,
-        role: role,
-        profileData: finalProfileData,
+      const data = new FormData();
+      data.append('name', formData.name);
+      data.append('email', formData.email);
+      data.append('password', formData.password);
+      data.append('role', formData.role);
+      data.append('phone', formData.phone);
+
+      await authAPI.register(data);
+      
+      setSuccess('Registration successful! Please wait for Alumni verification before logging in.');
+      
+      setFormData({
+        name: '',
+        email: '',
+        password: '',
+        confirmPassword: '',
+        role: 'student',
+        phone: ''
       });
       
-      setSuccess(true);
       setTimeout(() => {
-        navigate('/login');
+        navigate('/login?message=Account created! Please wait for Alumni verification.');
       }, 3000);
+      
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed. Please try again.');
+      setError(err.response?.data?.message || 'Registration failed');
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  // Role selection cards
-  const roles = [
-    {
-      id: 'student',
-      label: 'Student',
-      icon: GraduationCap,
-      description: 'Looking for job opportunities',
-      color: 'bg-blue-50 border-blue-200 hover:border-blue-400',
-      iconColor: 'text-blue-600',
-    },
-    {
-      id: 'company',
-      label: 'Company',
-      icon: Building2,
-      description: 'Hiring talented students',
-      color: 'bg-purple-50 border-purple-200 hover:border-purple-400',
-      iconColor: 'text-purple-600',
-    },
-    {
-      id: 'alumni',
-      label: 'Alumni',
-      icon: Briefcase,
-      description: 'Refer and mentor students',
-      color: 'bg-green-50 border-green-200 hover:border-green-400',
-      iconColor: 'text-green-600',
-    },
-  ];
-
-  if (success) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 via-white to-primary-50 py-12 px-4">
-        <div className="w-full max-w-md text-center">
-          <div className="inline-flex items-center justify-center h-20 w-20 bg-green-100 rounded-full mb-6">
-            <CheckCircle2 className="h-10 w-10 text-green-600" />
-          </div>
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">Registration Successful!</h2>
-          <p className="text-gray-600 mb-8">
-            Your account has been created. Please wait for TPO verification before logging in.
-          </p>
-          <p className="text-sm text-gray-500">
-            Redirecting to login page...
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-primary-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="w-full max-w-2xl mx-auto">
-        {/* Header */}
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-lg mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center h-16 w-16 bg-primary-600 rounded-2xl mb-4 shadow-lg">
-            <GraduationCap className="h-8 w-8 text-white" />
-          </div>
-          <h2 className="text-3xl font-bold text-gray-900">
-            Create Account
-          </h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Step {step} of 2: {step === 1 ? 'Account Setup' : 'Profile Details'}
-          </p>
+          <h1 className="text-3xl font-bold text-gray-900">Create Account</h1>
+          <p className="text-gray-600 mt-2">Join Smart Placement Portal</p>
         </div>
 
-        {/* Progress Bar */}
-        <div className="mb-8">
-          <div className="flex items-center gap-4">
-            <div className={`flex-1 h-2 rounded-full ${step >= 1 ? 'bg-primary-600' : 'bg-gray-200'}`}></div>
-            <div className={`flex-1 h-2 rounded-full ${step >= 2 ? 'bg-primary-600' : 'bg-gray-200'}`}></div>
-          </div>
-        </div>
-
-        {/* Error Alert */}
         {error && (
           <div className="mb-6 flex items-start gap-3 bg-red-50 border border-red-200 rounded-lg p-4">
             <AlertCircle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
@@ -268,353 +528,139 @@ const RegisterPage = () => {
           </div>
         )}
 
-        {/* Step 1: Account Information */}
-        {step === 1 && (
-          <div className="card shadow-lg space-y-6">
-            {/* Role Selection */}
+        {success && (
+          <div className="mb-6 flex items-start gap-3 bg-green-50 border border-green-200 rounded-lg p-4">
+            <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+            <p className="text-sm text-green-700">{success}</p>
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="card space-y-5">
+          {/* Role Selection */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Register As</label>
+            <div className="grid grid-cols-3 gap-3">
+              {['student', 'company', 'alumni'].map((r) => (
+                <button
+                  key={r}
+                  type="button"
+                  onClick={() => setFormData({ ...formData, role: r })}
+                  className={`py-2 px-4 rounded-lg border-2 text-sm font-medium capitalize transition-all ${
+                    formData.role === r
+                      ? 'border-primary-500 bg-primary-50 text-primary-700'
+                      : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                  }`}
+                >
+                  {r}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Name */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+            <div className="relative">
+              <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <input
+                type="text"
+                name="name"
+                required
+                value={formData.name}
+                onChange={handleChange}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                placeholder="Your full name"
+              />
+            </div>
+          </div>
+
+          {/* Email */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <div className="relative">
+              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <input
+                type="email"
+                name="email"
+                required
+                value={formData.email}
+                onChange={handleChange}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                placeholder="your@email.com"
+              />
+            </div>
+          </div>
+
+          {/* Phone */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+            <div className="relative">
+              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <input
+                type="tel"
+                name="phone"
+                required
+                value={formData.phone}
+                onChange={handleChange}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                placeholder="+91 98765 43210"
+              />
+            </div>
+          </div>
+
+          {/* Password */}
+          <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                Select Your Role <span className="text-red-500">*</span>
-              </label>
-              <div className="grid sm:grid-cols-3 gap-4">
-                {roles.map((r) => (
-                  <button
-                    key={r.id}
-                    type="button"
-                    onClick={() => setRole(r.id)}
-                    className={`p-4 rounded-xl border-2 text-left transition-all duration-200 ${
-                      role === r.id 
-                        ? 'border-primary-600 bg-primary-50 ring-2 ring-primary-200' 
-                        : r.color
-                    }`}
-                  >
-                    <r.icon className={`h-8 w-8 mb-2 ${role === r.id ? 'text-primary-600' : r.iconColor}`} />
-                    <p className="font-semibold text-gray-900">{r.label}</p>
-                    <p className="text-xs text-gray-500 mt-1">{r.description}</p>
-                  </button>
-                ))}
+              <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <input
+                  type="password"
+                  name="password"
+                  required
+                  value={formData.password}
+                  onChange={handleChange}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  placeholder="••••••"
+                />
               </div>
             </div>
-
-            {/* Email */}
-            <InputField
-              label="Email Address"
-              type="email"
-              name="email"
-              value={accountData.email}
-              onChange={handleAccountChange}
-              placeholder="Enter your email"
-              required={true}
-              icon={Mail}
-            />
-
-            {/* Password */}
-            <InputField
-              label="Password"
-              type="password"
-              name="password"
-              value={accountData.password}
-              onChange={handleAccountChange}
-              placeholder="Create a password"
-              required={true}
-              icon={Lock}
-            />
-
-            {/* Confirm Password */}
-            <InputField
-              label="Confirm Password"
-              type="password"
-              name="confirmPassword"
-              value={accountData.confirmPassword}
-              onChange={handleAccountChange}
-              placeholder="Confirm your password"
-              required={true}
-              icon={Lock}
-            />
-
-            <Button
-              type="button"
-              variant="primary"
-              fullWidth={true}
-              onClick={handleNextStep}
-              icon={ArrowRight}
-            >
-              Continue
-            </Button>
-          </div>
-        )}
-
-        {/* Step 2: Profile Details */}
-        {step === 2 && (
-          <div className="card shadow-lg space-y-6">
-            {/* Student Profile */}
-            {role === 'student' && (
-              <>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Personal Information</h3>
-                <div className="grid sm:grid-cols-2 gap-4">
-                  <InputField
-                    label="Full Name"
-                    name="personalInfo.name"
-                    value={profileData.personalInfo.name}
-                    onChange={handleProfileChange}
-                    placeholder="Enter your full name"
-                    required={true}
-                    icon={User}
-                  />
-                  <InputField
-                    label="Roll Number"
-                    name="personalInfo.rollNumber"
-                    value={profileData.personalInfo.rollNumber}
-                    onChange={handleProfileChange}
-                    placeholder="e.g., CSE2022001"
-                    required={true}
-                  />
-                </div>
-
-                <div className="grid sm:grid-cols-2 gap-4">
-                  <InputField
-                    label="Branch"
-                    type="select"
-                    name="personalInfo.branch"
-                    value={profileData.personalInfo.branch}
-                    onChange={handleProfileChange}
-                    required={true}
-                    options={[
-                      { value: 'CSE', label: 'Computer Science' },
-                      { value: 'IT', label: 'Information Technology' },
-                      { value: 'ECE', label: 'Electronics & Communication' },
-                      { value: 'EEE', label: 'Electrical & Electronics' },
-                      { value: 'MECH', label: 'Mechanical' },
-                      { value: 'CIVIL', label: 'Civil' },
-                      { value: 'OTHER', label: 'Other' },
-                    ]}
-                  />
-                  <InputField
-                    label="Year"
-                    type="select"
-                    name="personalInfo.year"
-                    value={profileData.personalInfo.year}
-                    onChange={handleProfileChange}
-                    required={true}
-                    options={[
-                      { value: '1', label: '1st Year' },
-                      { value: '2', label: '2nd Year' },
-                      { value: '3', label: '3rd Year' },
-                      { value: '4', label: '4th Year' },
-                    ]}
-                  />
-                </div>
-
-                <h3 className="text-lg font-semibold text-gray-900 mb-4 mt-6">Academic Details</h3>
-                <div className="grid sm:grid-cols-2 gap-4">
-                  <InputField
-                    label="CGPA"
-                    type="number"
-                    name="academics.cgpa"
-                    value={profileData.academics.cgpa}
-                    onChange={handleProfileChange}
-                    placeholder="e.g., 8.5"
-                    required={true}
-                  />
-                  <InputField
-                    label="Active Backlogs"
-                    type="number"
-                    name="academics.backlogs"
-                    value={profileData.academics.backlogs}
-                    onChange={handleProfileChange}
-                    placeholder="e.g., 0"
-                  />
-                </div>
-
-                <div className="grid sm:grid-cols-2 gap-4">
-                  <InputField
-                    label="10th Percentage"
-                    type="number"
-                    name="academics.tenthPercent"
-                    value={profileData.academics.tenthPercent}
-                    onChange={handleProfileChange}
-                    placeholder="e.g., 85"
-                    required={true}
-                  />
-                  <InputField
-                    label="12th Percentage"
-                    type="number"
-                    name="academics.twelfthPercent"
-                    value={profileData.academics.twelfthPercent}
-                    onChange={handleProfileChange}
-                    placeholder="e.g., 82"
-                    required={true}
-                  />
-                </div>
-
-                <InputField
-                  label="Skills (comma separated)"
-                  name="skills"
-                  value={profileData.skills.join(', ')}
-                  onChange={handleSkillsChange}
-                  placeholder="e.g., JavaScript, React, Node.js, Python"
-                />
-
-                <InputField
-                  label="Expected Package (LPA)"
-                  type="number"
-                  name="preferences.expectedPackage"
-                  value={profileData.preferences.expectedPackage}
-                  onChange={handleProfileChange}
-                  placeholder="e.g., 8"
-                />
-              </>
-            )}
-
-            {/* Company Profile */}
-            {role === 'company' && (
-              <>
-                <InputField
-                  label="Company Name"
-                  name="name"
-                  value={profileData.name}
-                  onChange={handleProfileChange}
-                  placeholder="Enter company name"
-                  required={true}
-                  icon={Building2}
-                />
-                <InputField
-                  label="Description"
-                  type="textarea"
-                  name="description"
-                  value={profileData.description}
-                  onChange={handleProfileChange}
-                  placeholder="Brief description about your company"
-                />
-                <InputField
-                  label="Website"
-                  name="website"
-                  value={profileData.website}
-                  onChange={handleProfileChange}
-                  placeholder="https://yourcompany.com"
-                />
-              </>
-            )}
-
-            {/* Alumni Profile */}
-            {role === 'alumni' && (
-              <>
-                <div className="grid sm:grid-cols-2 gap-4">
-                  <InputField
-                    label="Current Company"
-                    name="company"
-                    value={profileData.company}
-                    onChange={handleProfileChange}
-                    placeholder="Where do you work?"
-                    required={true}
-                    icon={Building2}
-                  />
-                  <InputField
-                    label="Current Role"
-                    name="role"
-                    value={profileData.role}
-                    onChange={handleProfileChange}
-                    placeholder="e.g., Software Engineer"
-                    required={true}
-                    icon={Briefcase}
-                  />
-                </div>
-
-                <div className="grid sm:grid-cols-2 gap-4">
-                  <InputField
-                    label="Graduation Batch"
-                    type="number"
-                    name="batch"
-                    value={profileData.batch}
-                    onChange={handleProfileChange}
-                    placeholder="e.g., 2022"
-                    required={true}
-                  />
-                  <InputField
-                    label="Branch"
-                    type="select"
-                    name="branch"
-                    value={profileData.branch}
-                    onChange={handleProfileChange}
-                    required={true}
-                    options={[
-                      { value: 'CSE', label: 'Computer Science' },
-                      { value: 'IT', label: 'Information Technology' },
-                      { value: 'ECE', label: 'Electronics & Communication' },
-                      { value: 'EEE', label: 'Electrical & Electronics' },
-                      { value: 'MECH', label: 'Mechanical' },
-                      { value: 'CIVIL', label: 'Civil' },
-                      { value: 'OTHER', label: 'Other' },
-                    ]}
-                  />
-                </div>
-
-                <div className="flex flex-col sm:flex-row gap-4 mt-4">
-                  <label className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
-                    <input
-                      type="checkbox"
-                      checked={profileData.willingToRefer}
-                      onChange={(e) => setProfileData({...profileData, willingToRefer: e.target.checked})}
-                      className="h-5 w-5 text-primary-600 rounded"
-                    />
-                    <div>
-                      <p className="font-medium text-gray-900">Willing to Refer</p>
-                      <p className="text-sm text-gray-500">Help juniors get opportunities</p>
-                    </div>
-                  </label>
-
-                  <label className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
-                    <input
-                      type="checkbox"
-                      checked={profileData.mentorshipAvailable}
-                      onChange={(e) => setProfileData({...profileData, mentorshipAvailable: e.target.checked})}
-                      className="h-5 w-5 text-primary-600 rounded"
-                    />
-                    <div>
-                      <p className="font-medium text-gray-900">Available for Mentorship</p>
-                      <p className="text-sm text-gray-500">Guide students in their career</p>
-                    </div>
-                  </label>
-                </div>
-              </>
-            )}
-
-            {/* Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                fullWidth={true}
-                onClick={() => setStep(1)}
-              >
-                Back
-              </Button>
-              <Button
-                type="submit"
-                variant="primary"
-                fullWidth={true}
-                isLoading={isLoading}
-                onClick={handleSubmit}
-                icon={ArrowRight}
-              >
-                Complete Registration
-              </Button>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Confirm</label>
+              <input
+                type="password"
+                name="confirmPassword"
+                required
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                placeholder="••••••"
+              />
             </div>
           </div>
-        )}
 
-        {/* Login Link */}
-        <div className="mt-8 text-center">
-          <p className="text-sm text-gray-600">
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full btn-primary py-3 flex items-center justify-center gap-2"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Creating Account...
+              </>
+            ) : (
+              'Create Account'
+            )}
+          </button>
+
+          <p className="text-center text-sm text-gray-600">
             Already have an account?{' '}
-            <Link
-              to="/login"
-              className="text-primary-600 hover:text-primary-700 font-medium transition-colors"
-            >
-              Sign in
+            <Link to="/login" className="text-primary-600 hover:text-primary-700 font-medium">
+              Login
             </Link>
           </p>
-        </div>
+        </form>
       </div>
     </div>
   );

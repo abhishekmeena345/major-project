@@ -1,160 +1,156 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import InputField from '../components/common/InputField';
-import Button from '../components/common/Button';
-import { Mail, Lock, GraduationCap, ArrowRight, AlertCircle } from 'lucide-react';
+import { 
+  Mail, 
+  Lock, 
+  AlertCircle,
+  Loader2,
+  Info
+} from 'lucide-react';
 
 const LoginPage = () => {
-  const { login } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { login } = useAuth();
   
   const [formData, setFormData] = useState({
     email: '',
-    password: '',
+    password: ''
   });
+  
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [infoMessage, setInfoMessage] = useState('');
+
+  // Read message from URL (coming from register redirect)
+  useEffect(() => {
+    const message = searchParams.get('message');
+    if (message) {
+      setInfoMessage(message);
+      searchParams.delete('message');
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-    setError(''); // Clear error on input change
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+    if (error) setError('');
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
+    if (loading) return;
+    
     setError('');
+    setInfoMessage('');
+
+    if (!formData.email || !formData.password) {
+      setError('Please provide email and password');
+      return;
+    }
+
+    setLoading(true);
 
     try {
+      // ✅ Directly call AuthContext login — woh khud API call karega
       const userData = await login(formData.email, formData.password);
       
       // Redirect based on role
-      const roleRedirects = {
-        student: '/student/dashboard',
-        tpo: '/tpo/dashboard',
-        company: '/company/dashboard',
-        alumni: '/alumni/dashboard',
-      };
+      const role = userData.role;
+      if (role === 'student') navigate('/student/dashboard');
+      else if (role === 'company') navigate('/company/dashboard');
+      else if (role === 'tpo') navigate('/tpo/dashboard');
       
-      navigate(roleRedirects[userData.role] || '/');
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed. Please try again.');
+      console.error('Login error:', err);
+      const message = err.response?.data?.message 
+        || err.message 
+        || 'Login failed. Please try again.';
+      setError(message);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 via-white to-primary-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="w-full max-w-md">
-        {/* Logo & Header */}
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-md mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center h-16 w-16 bg-primary-600 rounded-2xl mb-4 shadow-lg">
-            <GraduationCap className="h-8 w-8 text-white" />
-          </div>
-          <h2 className="text-3xl font-bold text-gray-900">
-            Welcome Back
-          </h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Sign in to your Smart Placement account
-          </p>
+          <h1 className="text-3xl font-bold text-gray-900">Welcome Back</h1>
+          <p className="text-gray-600 mt-2">Login to Smart Placement Portal</p>
         </div>
 
-        {/* Login Card */}
-        <div className="card shadow-lg">
-          {/* Error Alert */}
-          {error && (
-            <div className="mb-6 flex items-start gap-3 bg-red-50 border border-red-200 rounded-lg p-4">
-              <AlertCircle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
-              <p className="text-sm text-red-700">{error}</p>
-            </div>
-          )}
+        {/* Info message from register redirect */}
+        {infoMessage && (
+          <div className="mb-6 flex items-start gap-3 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+            <Info className="h-5 w-5 text-yellow-600 mt-0.5 flex-shrink-0" />
+            <p className="text-sm text-yellow-700">{infoMessage}</p>
+          </div>
+        )}
 
-          {/* Login Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <InputField
-              label="Email Address"
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="Enter your email"
-              required={true}
-              icon={Mail}
-            />
+        {error && (
+          <div className="mb-6 flex items-start gap-3 bg-red-50 border border-red-200 rounded-lg p-4">
+            <AlertCircle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
+            <p className="text-sm text-red-700">{error}</p>
+          </div>
+        )}
 
-            <InputField
-              label="Password"
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="Enter your password"
-              required={true}
-              icon={Lock}
-            />
-
-            <div className="flex items-center justify-between">
-              <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
-                />
-                <span className="text-sm text-gray-600">Remember me</span>
-              </label>
-              <Link
-                to="/forgot-password"
-                className="text-sm text-primary-600 hover:text-primary-700 font-medium"
-              >
-                Forgot password?
-              </Link>
-            </div>
-
-            <Button
-              type="submit"
-              variant="primary"
-              fullWidth={true}
-              isLoading={isLoading}
-              icon={ArrowRight}
-            >
-              Sign In
-            </Button>
-          </form>
-
-          {/* Divider */}
-          <div className="mt-6 relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-200"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">
-                New to Smart Placement?
-              </span>
+        <form onSubmit={handleSubmit} className="card space-y-5">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <div className="relative">
+              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <input
+                type="email"
+                name="email"
+                required
+                value={formData.email}
+                onChange={handleChange}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                placeholder="your@email.com"
+              />
             </div>
           </div>
 
-          {/* Register Link */}
-          <div className="mt-6 text-center">
-            <Link
-              to="/register"
-              className="inline-flex items-center gap-2 text-primary-600 hover:text-primary-700 font-medium transition-colors"
-            >
-              Create an account
-              <ArrowRight className="h-4 w-4" />
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+            <div className="relative">
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <input
+                type="password"
+                name="password"
+                required
+                value={formData.password}
+                onChange={handleChange}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                placeholder="••••••"
+              />
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full btn-primary py-3 flex items-center justify-center gap-2 disabled:opacity-50"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Logging in...
+              </>
+            ) : (
+              'Login'
+            )}
+          </button>
+
+          <p className="text-center text-sm text-gray-600">
+            Don't have an account?{' '}
+            <Link to="/register" className="text-primary-600 hover:text-primary-700 font-medium">
+              Create Account
             </Link>
-          </div>
-        </div>
-
-        {/* Demo Credentials */}
-        <div className="mt-8 text-center">
-          <p className="text-xs text-gray-500">
-            Demo: tpo@college.edu / tpopass123
           </p>
-        </div>
+        </form>
       </div>
     </div>
   );

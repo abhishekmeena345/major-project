@@ -8,26 +8,34 @@ const alumniProfileSchema = new mongoose.Schema(
       required: true,
       unique: true
     },
+    name: {
+      type: String,
+      default: ''
+    },
+    email: {
+      type: String,
+      default: ''
+    },
+    phone: {
+      type: String,
+      default: ''
+    },
     company: {
       type: String,
-      required: [true, 'Current company is required'],
-      trim: true
+      default: ''  // ← Optional now
     },
     role: {
       type: String,
-      required: [true, 'Current role is required'],
-      trim: true
+      default: ''  // ← Optional now
     },
     batch: {
       type: Number,
-      required: [true, 'Graduation batch year is required'],
-      min: 2000,
-      max: 2030
+      default: null  // ← Optional now
     },
     branch: {
       type: String,
-      required: [true, 'Branch is required'],
-      enum: ['CSE', 'IT', 'ECE', 'EEE', 'MECH', 'CIVIL', 'OTHER']
+      enum: ['CSE', 'IT', 'ECE', 'EEE', 'MECH', 'CIVIL', 'OTHER', ''],
+      default: ''  // ← Optional now
     },
     willingToRefer: {
       type: Boolean,

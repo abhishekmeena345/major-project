@@ -2,7 +2,7 @@ import { createContext, useState, useEffect, useContext } from 'react';
 import api from '../api/axios';
 
 // Create Auth Context
-const AuthContext = createContext(null);
+export const AuthContext = createContext(null);
 
 // Custom hook to use auth context
 export const useAuth = () => {
